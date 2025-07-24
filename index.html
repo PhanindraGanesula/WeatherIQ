@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherIQ</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="images/logo.png">
+</head>
+<body>
+    <div class="card">
+        <div class="search">
+            <input type="text" placeholder="Enter City Name" spellcheck="false">
+            <button><img src="images/search1.png"></button>
+        </div>
+        <div class="error">
+            <p>Invalid city name</p>
+        </div>
+        <div class="weather">
+            <img src="images/rain1.png" class="weather-icon">
+            <h1 class="temp">22°c</h1>
+            <h2 class="city">New York</h2>
+            <div class="details">
+                <div class="col">
+                    <img src="images/humidity4.png">
+                    <div>
+                        <p class="humidity">50%</p>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <img src="images/wind2.png">
+                    <div>
+                        <p class="wind">15 km/h</p>
+                        <p>Wind Speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="forecast">
+
+    </div>
+
+    <div class="city-description">
+        <p></p>
+    </div>
+
+    <script>
+        const apiKey = "5d479788f0fe74e50ba0d0608f55f404";
+        const apiUrl = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
+        const forecastApiUrl = "https://api.openweathermap.org/data/2.5/onecall?&units=metric&appid=";
+        const searchBox = document.querySelector(".search input");
+        const searchBtn = document.querySelector(".search button");
+        const weatherIcon = document.querySelector(".weather-icon");
+        const body = document.querySelector("body");
+
+        // Background images based on city name (lowercase city names)
+        const cityBackground = {
+            "hyderabad": "images/hyderabad.png",
+            "vijayawada": "images/vj.png",
+            "secunderabad": "images/secunderabad.png",
+            "ramoji film city": "images/rfc.png",
+            "kurnool": "images/kurnool.png",
+            "london": "images/london.png",
+            "new york": "images/nyc.png",
+            "new jersey": "images/nj.png",
+            "delhi": "images/delhi.png",
+            "jammu and kashmir": "images/jk.png",
+            "jammu": "images/jammu.png",
+            "chennai": "images/chennai.png",
+            "bengaluru": "images/bengaluru.png",
+            "agra": "images/agra.png",
+            "chennai": "images/chennai.png",
+            "goa": "images/goa.png",
+            "gujarat": "images/gu.png",
+            "haryana": "images/har.png",
+            "kerala": "images/kerala.png",
+            "kakinada": "images/kkd.png",
+            "madhya pradesh": "images/mp.png",
+            "pune": "images/pune.png",
+            "punjab": "images/pun.png",
+            "rajasthan": "images/raj.png",
+            "uttar pradesh": "images/up.png",
+            "marredpally": "images/vjias.png",
+            "visakhapatnam": "images/vizag.png",
+            "mumbai": "images/mumbai.png"
+        };
+const cityDescriptions = {
+    "hyderabad": "Hyderabad is a hot city 🌞 with warm winters, perfect for visits in winter to enjoy the cuisine 🍛 (like Biryani) and historical sites like Charminar 🏰 and Golkonda Fort. 🌶️🍽️",
+    "vijayawada": "Vijayawada is hot 🌞 in the summer and mild in winter. Best visited in the cooler months ❄️ to enjoy its temples 🏯, river views 🌊, and local food like Pulihora. 🍽️",
+    "secunderabad": "Secunderabad shares a similar climate 🌞 to Hyderabad, with hot summers and pleasant winters ❄️. Explore the historical markets 🏙️, lakes 🌅, and try local snacks like Osmania biscuits. 🍪",
+    "ramoji film city": "Ramoji Film City experiences hot 🌞 weather in summer. The best time to visit is winter ❄️ for cooler temperatures and fun film sets 🎥, attractions 🎢, and delicious food courts. 🍔🎬",
+    "kurnool": "Kurnool has a hot 🌞 climate with warm summers. The winter months ❄️ are ideal for visiting temples 🛕, natural landscapes, and tasting local dishes like Kurnool Biryani. 🍽️",
+    "london": "London has cool ❄️, mild weather year-round. Best to visit in spring 🌷 or autumn 🍁 to enjoy the historical landmarks 🏰, museums 🖼️, and fish & chips. 🍟",
+    "new york": "New York has hot summers 🌞 and cold winters ❄️. The best time to visit is spring 🌸 or fall 🍂 when the weather is perfect for sightseeing 🏙️ and trying the iconic New York pizza. 🍕",
+    "new jersey": "New Jersey has hot 🌞 summers and cold winters ❄️. The best time to visit is during the cooler months ❄️ for beaches 🏖️ and the famous Jersey tomatoes 🍅.",
+    "delhi": "Delhi experiences extreme weather 🌞❄️, with hot summers and cool winters. The best time to visit is from October to March 🍂 to explore the Red Fort 🏰, India Gate, and enjoy butter chicken. 🍗",
+    "jammu and kashmir": "Jammu and Kashmir has cool ❄️ summers and cold winters 🏔️. Best to visit in summer for breathtaking valley views 🌄 and try the local Wazwan food. 🍽️",
+    "chennai": "Chennai has a hot 🌞, tropical climate. Best to visit from November to February 🍂 for temples 🏯, beaches 🏖️, and savoring South Indian dosa and idli. 🍛",
+    "bengaluru": "Bengaluru has a moderate climate 🌿 year-round. Best to visit from October to March 🍂 to explore parks 🌳, lakes 🌊, and taste its famous Venn Pongal. 🍽️",
+    "agra": "Agra has hot 🌞 summers and cooler winters ❄️. Best to visit in winter to explore the Taj Mahal 🏰 and enjoy Mughlai cuisine, like kebabs. 🍗",
+    "goa": "Goa is a tropical beach destination 🏖️ with a hot 🌞 climate. Best visited in the cooler months ❄️ to relax on the beaches 🏝️ and enjoy seafood. 🦞",
+    "gujarat": "Gujarat has a mix of hot 🌞 and mild temperatures. Best to visit in winter ❄️ for its culture 🏯, the Rann of Kutch desert 🏜️, and try Gujarati thali. 🍽️",
+    "haryana": "Haryana experiences hot 🌞 summers and cool winters ❄️. The best time to visit is in winter to explore monuments 🏰 and enjoy the Surajkund Mela. 🎨",
+    "kerala": "Kerala, known for its backwaters 🌊 and beaches 🏖️, has a tropical climate 🌞. Visit from November to February 🍂 when temperatures are pleasant and enjoy traditional Kerala Sadya food. 🍛",
+    "kakinada": "Kakinada has a tropical climate 🌞 with hot summers and mild winters ❄️. Visit in winter for its beaches 🌴 and try the famous Kakinada Kaja sweet. 🍬",
+    "madhya pradesh": "Madhya Pradesh has hot 🌞 summers and cool winters ❄️. Best visited in winter to explore temples 🏯, wildlife sanctuaries 🦁, and taste the local Poha. 🍽️",
+    "pune": "Pune has a moderate climate 🌿 year-round. Best visited from October to March 🍂 to explore hill stations 🏞️, gardens 🌸, and the famous Misal Pav. 🍛",
+    "punjab": "Punjab has hot 🌞 summers and cool winters ❄️. Best time to visit is in winter to enjoy vibrant culture, gurdwaras 🏯, and Sarson da Saag. 🌾🍽️",
+    "rajasthan": "Rajasthan has hot 🌞 summers and cold winters ❄️. Best visited in winter to explore magnificent palaces 🏰, forts 🏯, and try Dal Baati Churma. 🍽️",
+    "uttar pradesh": "Uttar Pradesh has extreme weather 🌞❄️, with hot summers and cool winters. Visit in winter for the Taj Mahal 🏰 and enjoy a bowl of Kachori. 🍽️",
+    "marredpally": "Marredpally is similar to Secunderabad 🌞, perfect for peaceful walks in parks 🌳, local shopping 🛍️, and tasting local biryanis. 🍛",
+    "visakhapatnam": "Visakhapatnam 🌞 has a tropical climate – hot summers 🌡️ and mild winters (Oct-Feb) ❄️. Best to visit in winter for beaches 🏖️, Kailasagiri Hill 🏞️, and seafood. 🦞",
+    "mumbai": "Mumbai 🌆 has a tropical climate – hot and humid summers 🌡️, rainy monsoons 🌧️, and pleasant winters ❄️. Best time to visit: Nov-Feb 🌴 for Marine Drive 🌊, Gateway of India 🏰, and vada pav. 🍔"
+};
+
+async function checkWeather(city) {
+            const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+            if (!response.ok) {
+                document.querySelector(".error").style.display = "block";
+                document.querySelector(".weather").style.display = "none";
+                return;
+            } else {
+                const data = await response.json();
+
+                // Extract latitude and longitude for forecast
+                const lat = data.coord.lat;
+                const lon = data.coord.lon;
+
+                // Fetch 7-day forecast data
+                const forecastResponse = await fetch(`${forecastApiUrl}&lat=${lat}&lon=${lon}`);
+                const forecastData = await forecastResponse.json();
+
+        
+                // Display weather details
+                document.querySelector(".city").innerHTML = data.name;
+                document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°c";
+                document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+                document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
+
+                // Set weather icon based on conditions
+                if (data.weather[0].main === "Clouds") {
+                    weatherIcon.src = "images/clouds.png";
+                } else if (data.weather[0].main === "Clear") {
+                    weatherIcon.src = "images/clear.png";
+                } else if (data.weather[0].main === "Rain") {
+                    weatherIcon.src = "images/rain.png";
+                } else if (data.weather[0].main === "Drizzle") {
+                    weatherIcon.src = "images/drizzle.png";
+                } else if (data.weather[0].main === "Mist") {
+                    weatherIcon.src = "images/mist.png";
+                } else if (data.weather[0].main === "Moon") {
+                    weatherIcon.src = "images/moon.png";
+                }
+
+                // Convert city name to lowercase and apply background image
+                const cityLowerCase = city.toLowerCase().trim();
+                const backgroundImage = cityBackground[cityLowerCase];
+                const cityDescriptionText = cityDescriptions[cityLowerCase];
+
+                if (backgroundImage) {
+                    body.style.backgroundImage = `url(${backgroundImage})`;
+                    body.style.backgroundSize = "cover";
+                    body.style.backgroundPosition = "center";
+                } else {
+                    // Default background if the city does not match
+                    body.style.backgroundImage = "url('images/default.jpg')";
+                }
+
+                if (cityDescriptionText) {
+                    document.querySelector(".city-description p").innerHTML = cityDescriptionText;
+                    document.querySelector(".city-description").style.display = "block";
+                } else {
+                    document.querySelector(".city-description").style.display = "none";
+                }
+
+                // Show the weather and hide the error
+                document.querySelector(".weather").style.display = "block";
+                document.querySelector(".error").style.display = "none";
+
+                displayForecast(forecastData.daily);
+            }
+        }
+        function displayForecast(forecast) {
+            const forecastContainer = document.querySelector(".forecast");
+            forecastContainer.innerHTML = "";  // Clear previous forecast
+
+            forecast.forEach((day, index) => {
+                const dayElement = document.createElement("div");
+                dayElement.classList.add("forecast-day");
+
+                const date = new Date(day.dt * 1000);
+                const dayName = date.toLocaleString("en", { weekday: "short" });
+
+                const icon = document.createElement("img");
+                icon.src = `https://openweathermap.org/img/wn/${day.weather[0].icon}.png`;
+                icon.alt = day.weather[0].main;
+
+                const temp = document.createElement("p");
+                temp.textContent = `${Math.round(day.temp.day)}°C`;
+
+                const dayLabel = document.createElement("p");
+                dayLabel.textContent = dayName;
+
+                dayElement.appendChild(icon);
+                dayElement.appendChild(dayLabel);
+                dayElement.appendChild(temp);
+
+                forecastContainer.appendChild(dayElement);
+            });
+        }
+
+
+        // Event listeners for search button and enter key
+        searchBox.addEventListener("keypress", (event) => {
+            if (event.key === "Enter") {
+                checkWeather(searchBox.value);
+            }
+        });
+
+        searchBtn.addEventListener("click", () => {
+            if (searchBox.value.trim() === "") {
+                alert("Please enter a city name.");
+                return;
+            }
+            checkWeather(searchBox.value);
+        });
+    </script>
+</body>
+</html>
